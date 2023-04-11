@@ -4,7 +4,7 @@ import Footer from "../components/footer";
 export default function Root() {
   return (
     <div className="container mx-auto bg-white">
-      <Header />
+      <Header active="/" />
 
       <div className="relative isolate px-6 pt-14 lg:px-8">
         <div

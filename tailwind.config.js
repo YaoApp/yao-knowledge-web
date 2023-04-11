@@ -5,6 +5,7 @@ export default {
     extend: {
       backgroundImage: {
         space: "url('/space-bg.jpg')",
+        hacker: "url('/hacker-bg.jpg')",
       },
     },
   },

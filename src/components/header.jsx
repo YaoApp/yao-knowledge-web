@@ -4,15 +4,20 @@ import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
 export default function Header(props) {
   const color = props.color || "black";
+  const active = props.active || "";
   const textClassName =
     color == "black"
-      ? "text-sm font-semibold leading-6 text-gray-900"
-      : "text-sm font-semibold leading-6 text-gray-100";
+      ? "text-sm font-medium leading-6 text-gray-900 px-3.5 py-2"
+      : "text-sm font-medium leading-6 text-gray-100 px-3.5 py-2";
+
+  const activeTextClassName =
+    color == "black"
+      ? "text-sm font-medium leading-6 text-gray-900 rounded-full bg-purple-950/10 px-3.5 py-2"
+      : "text-sm font-medium leading-6 text-gray-100 rounded-full bg-white/10 px-3.5 py-2";
 
   const logoSrc = color == "black" ? "/xiang.svg" : "/xiang-w.svg";
-
   const navigation = [
-    { name: "YAO 应用引擎", href: "https://yaoapps.com", target: "blank" },
+    { name: "象传知识库", href: "/" },
     { name: "语义搜索", href: "/search" },
     { name: "聊天机器人", href: "/chat" },
     {
@@ -20,6 +25,7 @@ export default function Header(props) {
       href: "https://github.com/YaoApp/yao-knowledge",
       target: "blank",
     },
+    { name: "YAO 应用引擎", href: "https://yaoapps.com", target: "blank" },
   ];
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -31,7 +37,7 @@ export default function Header(props) {
         aria-label="Global"
       >
         <div className="flex lg:flex-1">
-          <a href="/" className="-m-1.5 p-1.5">
+          <a href="https://iqka.com" target="blank" className="-m-1.5 p-1.5">
             <span className="sr-only">象传智慧</span>
             <img className="h-16 w-auto" src={logoSrc} alt="" />
           </a>
@@ -52,7 +58,9 @@ export default function Header(props) {
               key={item.name}
               href={item.href}
               target={item.target ? item.target : "_self"}
-              className={textClassName}
+              className={
+                item.href == active ? activeTextClassName : textClassName
+              }
             >
               {item.name}
             </a>
