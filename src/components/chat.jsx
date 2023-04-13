@@ -9,6 +9,7 @@ export default function Chat() {
   const [pending, setPending] = useState(false);
   const [input, setInput] = useState("");
   const [isReady, setIsReady] = useState(false);
+  const [eventSource, seteventSource] = useState(null);
 
   const scrollRef = useRef(null);
   const textareaRef = useRef(null);
@@ -36,45 +37,69 @@ export default function Chat() {
     setIsReady(false);
   }, [input]);
 
-  const send = async (messages, words, index) => {
-    return new Promise(async (resolve, reject) => {
-      const newMessages = [...messages];
-      newMessages[newMessages.length - 1].answer =
-        newMessages[newMessages.length - 1].answer + words[index];
-      setMessages(newMessages);
-      // resolve(true);
+  // send message
+  const fetchData = async (messages) => {
+    return new Promise((resolve, reject) => {
+      const es = new EventSource(
+        "/api/chat/stream?question=" +
+          encodeURIComponent(messages[messages.length - 1].question)
+      );
 
-      const next = index + 1;
-      if (words.length < next + 1) {
+      seteventSource(es);
+
+      es.onopen = () => {
+        console.log("Connected to server");
+      };
+
+      es.onmessage = (event) => {
+        if (event.data != "" && event.data != null && event.data != "[DONE]") {
+          const data = JSON.parse(event.data);
+          let word =
+            data.choices && data.choices.length > 0
+              ? data.choices[0].delta.content
+              : "";
+
+          if (event.data == "") {
+            word = "\n";
+          }
+
+          if (word) {
+            const newMessages = [...messages];
+            newMessages[newMessages.length - 1].answer =
+              newMessages[newMessages.length - 1].answer + word;
+            setMessages(newMessages);
+          }
+        } else if (event.data == "[DONE]") {
+          const newMessages = [...messages];
+          newMessages[newMessages.length - 1].pending = false;
+          setMessages(newMessages);
+          console.log("Resolve:", true);
+          resolve(true);
+          setPending(false);
+          return;
+        }
+      };
+
+      es.onerror = (event) => {
+        // console.error("Error:", event);
+        es.close();
+        const newMessages = [...messages];
         newMessages[newMessages.length - 1].pending = false;
         setMessages(newMessages);
         console.log("Resolve:", true);
         resolve(true);
         setPending(false);
-        return;
-      }
+      };
 
-      setTimeout(async () => {
-        await send(messages, words, next);
-      }, 500);
+      return () => {
+        const newMessages = [...messages];
+        newMessages[newMessages.length - 1].pending = false;
+        setMessages(newMessages);
+        resolve(true);
+        setPending(false);
+        es.close();
+      };
     });
-  };
-
-  // sendTest
-  const sendData = async (messages) => {
-    return send(
-      messages,
-      [
-        "这",
-        "是",
-        "一条",
-        "测试",
-        "阿萨德合法水电费",
-        "ASDFASDFASDFASDF",
-        "。",
-      ],
-      0
-    );
   };
 
   // push message
@@ -88,6 +113,21 @@ export default function Chat() {
     if ((event.ctrlKey || event.metaKey) && event.keyCode === 13) {
       handleSubmit();
     }
+  };
+
+  const handleStop = async (e) => {
+    try {
+      eventSource.close();
+    } catch (err) {
+      console.log("===eventSource", eventSource, err);
+    }
+
+    console.log(eventSource);
+
+    const newMessages = [...messages];
+    newMessages[newMessages.length - 1].pending = false;
+    setMessages(newMessages);
+    setPending(false);
   };
 
   const handleSubmit = async (e) => {
@@ -106,7 +146,7 @@ export default function Chat() {
     setInput("");
     const newMessages = pushMessage(message);
     try {
-      await sendData(newMessages);
+      await fetchData(newMessages);
       console.log("===Pending", pending);
     } catch (err) {
       // somting error
@@ -143,7 +183,10 @@ export default function Chat() {
                       pending ? "" : "invisible"
                     }`}
                   >
-                    <Combobox.Button className="border border-gray-700 text-gray-400 text-sm hover:bg-gray-600 active:bg-gray-700 focus:outline-none ">
+                    <Combobox.Button
+                      onClick={handleStop}
+                      className="border border-gray-700 text-gray-400 text-sm hover:bg-gray-600 active:bg-gray-700 focus:outline-none "
+                    >
                       <StopIcon
                         className="inline-block h-5 w-5 text-gray-400 mr-1"
                         aria-hidden="true"
