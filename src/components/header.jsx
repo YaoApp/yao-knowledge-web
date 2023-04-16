@@ -67,7 +67,7 @@ export default function Header(props) {
           ))}
         </div>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-          <a href="/admin" className={textClassName}>
+          <a href="/signin" className={textClassName}>
             登录 <span aria-hidden="true">&rarr;</span>
           </a>
         </div>
