@@ -4,12 +4,21 @@ import Footer from "../components/footer";
 import SearchInput from "../components/search-input";
 import Items from "../components/items";
 import Pagination from "../components/pagination";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 export default function List() {
-  const [input, setInput] = useState("");
   const [page, setPage] = useState(1);
   const [result, setResult] = useState({ items: [], total: 0 });
   const [pending, setPending] = useState(false);
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const q = queryParams.get("q") || "";
+  const [input, setInput] = useState(q);
+
+  useEffect(() => {
+    if (q == "") return;
+    fetchData(1);
+  }, [q]);
 
   const handleInput = (event) => {
     setInput(event.target.value);
@@ -49,6 +58,7 @@ export default function List() {
             onKeyDown={handleKeyDown}
             onChange={handleInput}
             onSubmit={handleSubmit}
+            value={input}
           />
         </div>
         <Items

@@ -13,6 +13,7 @@ export default function SearchIntput(props) {
             onChange={props.onChange}
             onKeyDown={props.onKeyDown}
             disabled={props.pending}
+            value={props.value}
           />
           <button
             className="absolute inset-y-0 right-0 flex items-center pr-4"
