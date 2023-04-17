@@ -1,12 +1,15 @@
 import { PaperAirplaneIcon, StopIcon } from "@heroicons/react/24/outline";
 import React, { useEffect, useRef, useState } from "react";
 import { Combobox, Transition } from "@headlessui/react";
+import { Link, useNavigate, redirect } from "react-router-dom";
 import Message from "./message";
 
 export default function Chat() {
+  const navigate = useNavigate();
   const avatar = "https://game.gtimg.cn/images/lol/act/img/champion/Annie.png";
-
   const [pending, setPending] = useState(false);
+  const [token, setToken] = useState("");
+  const [login, setLogin] = useState(false);
   const [input, setInput] = useState("");
   const [isReady, setIsReady] = useState(false);
   const [eventSource, seteventSource] = useState(null);
@@ -15,6 +18,29 @@ export default function Chat() {
   const textareaRef = useRef(null);
 
   const [messages, setMessages] = useState([]);
+
+  // check login
+  useEffect(() => {
+    if (login) {
+      navigate("/signin");
+      return;
+    }
+
+    const userData = sessionStorage.getItem("login");
+    if (!userData) {
+      navigate("/signin");
+      return;
+    }
+
+    const user = JSON.parse(userData);
+    const now = Math.floor(Date.now() / 1000);
+    if (user.expires_at - now <= 0) {
+      navigate("/signin");
+      return;
+    }
+
+    setToken(user.token);
+  }, [login]);
 
   // update scroll position
   useEffect(() => {
@@ -41,12 +67,12 @@ export default function Chat() {
   const fetchData = async (messages) => {
     return new Promise((resolve, reject) => {
       const es = new EventSource(
-        "/api/chat/stream?question=" +
-          encodeURIComponent(messages[messages.length - 1].question)
+        `/api/chat/stream?question=${encodeURIComponent(
+          messages[messages.length - 1].question
+        )}&token=${encodeURIComponent(token)}`
       );
 
       seteventSource(es);
-
       es.onopen = () => {
         console.log("Connected to server");
       };
@@ -73,30 +99,30 @@ export default function Chat() {
           const newMessages = [...messages];
           newMessages[newMessages.length - 1].pending = false;
           setMessages(newMessages);
-          console.log("Resolve:", true);
-          resolve(true);
           setPending(false);
+          resolve(true);
           return;
         }
       };
 
       es.onerror = (event) => {
-        // console.error("Error:", event);
+        console.log(event.message);
+
         es.close();
         const newMessages = [...messages];
         newMessages[newMessages.length - 1].pending = false;
         setMessages(newMessages);
-        console.log("Resolve:", true);
-        resolve(true);
         setPending(false);
+        // setLogin(true);
+        resolve(true);
       };
 
       return () => {
         const newMessages = [...messages];
         newMessages[newMessages.length - 1].pending = false;
         setMessages(newMessages);
-        resolve(true);
         setPending(false);
+        resolve(true);
         es.close();
       };
     });
