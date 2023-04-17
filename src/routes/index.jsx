@@ -34,17 +34,19 @@ export default function Root() {
               你的专有企业知识库
             </h1>
             <p className="mt-6 text-lg leading-8 text-gray-600">
-              独立部署、ChatGPT 驱动、支持语义搜索、聊天机器人的协同知识库。
+              独立部署、ChatGPT 驱动、支持全文语义搜索、聊天机器人的协同知识库。
+              <br />
+              Word、 PPT、 PDF、 Excel、网页多种格式文档一键导入。
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <a
-                href="#"
+                href="/search"
                 className="rounded-md bg-purple-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-700"
               >
                 语义搜索
               </a>
               <a
-                href="#"
+                href="/chat"
                 className="text-sm font-semibold leading-6 text-gray-900"
               >
                 聊天机器人 <span aria-hidden="true">→</span>

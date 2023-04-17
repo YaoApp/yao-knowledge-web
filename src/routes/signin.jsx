@@ -62,7 +62,7 @@ export default function Signin() {
             <p className="mt-2 text-center text-sm text-gray-600">
               可在{" "}
               <a
-                href="/admin"
+                href="/admin/"
                 className="font-medium text-indigo-600 hover:text-indigo-500"
               >
                 管理后台
