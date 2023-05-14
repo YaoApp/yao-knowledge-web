@@ -66,11 +66,19 @@ export default function Chat() {
   // send message
   const fetchData = async (messages) => {
     return new Promise((resolve, reject) => {
-      const es = new EventSource(
-        `/api/chat/stream?question=${encodeURIComponent(
-          messages[messages.length - 1].question
-        )}&token=${encodeURIComponent(token)}`
+      const context = encodeURIComponent(
+        JSON.stringify({ statck: "web-client", pathname: "/chat" })
       );
+
+      const content = encodeURIComponent(
+        messages[messages.length - 1].question
+      );
+
+      const url = `/api/__yao/neo?content=${content}&context=${context}&token=${
+        "Bearer " + encodeURIComponent(token)
+      }`;
+
+      const es = new EventSource(url);
 
       seteventSource(es);
       es.onopen = () => {
@@ -78,42 +86,45 @@ export default function Chat() {
       };
 
       es.onmessage = (event) => {
-        if (event.data != "" && event.data != null && event.data != "[DONE]") {
-          const data = JSON.parse(event.data);
-          let word =
-            data.choices && data.choices.length > 0
-              ? data.choices[0].delta.content
-              : "";
+        const newMessages = [...messages];
 
-          if (event.data == "") {
-            word = "\n";
-          }
+        let data = {};
+        try {
+          data = JSON.parse(event.data);
+        } catch (e) {
+          newMessages[newMessages.length - 1].answer =
+            newMessages[newMessages.length - 1].answer + "返回数据解析错误";
 
-          if (word) {
-            const newMessages = [...messages];
-            newMessages[newMessages.length - 1].answer =
-              newMessages[newMessages.length - 1].answer + word;
-            setMessages(newMessages);
-          }
-        } else if (event.data == "[DONE]") {
-          const newMessages = [...messages];
-          newMessages[newMessages.length - 1].pending = false;
           setMessages(newMessages);
           setPending(false);
           resolve(true);
           return;
         }
+
+        if (data.done) {
+          setMessages(newMessages);
+          setPending(false);
+          resolve(true);
+          return;
+
+          // Set the text
+        } else if (data.text && data.text != "") {
+          if (data.text.startsWith("\r")) {
+            newMessages[newMessages.length - 1].answer = "";
+          }
+          newMessages[newMessages.length - 1].answer =
+            newMessages[newMessages.length - 1].answer + data.text;
+          setMessages(newMessages);
+        }
       };
 
       es.onerror = (event) => {
         console.log(event.message);
-
         es.close();
         const newMessages = [...messages];
         newMessages[newMessages.length - 1].pending = false;
         setMessages(newMessages);
         setPending(false);
-        // setLogin(true);
         resolve(true);
       };
 
