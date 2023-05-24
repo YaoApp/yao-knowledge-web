@@ -9,7 +9,7 @@ import { Routes, useNavigate, useLocation } from "react-router-dom";
 export default function List() {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
-  const [result, setResult] = useState({ items: [], total: 0 });
+  const [result, setResult] = useState({ data: [], total: 0 });
   const [pending, setPending] = useState(false);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
