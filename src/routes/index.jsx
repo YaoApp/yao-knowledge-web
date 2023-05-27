@@ -23,7 +23,11 @@ export default function Root() {
           <div className="hidden sm:mb-8 sm:flex sm:justify-center">
             <div className="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
               购买商业版、商务合作请联系我们
-              <a href="#" className="font-semibold text-purple-700">
+              <a
+                href="https://yaoapps.com/contact"
+                target="_blank"
+                className="font-semibold text-purple-700"
+              >
                 <span className="absolute inset-0" aria-hidden="true" />
                 商务微信 <span aria-hidden="true">&rarr;</span>
               </a>
